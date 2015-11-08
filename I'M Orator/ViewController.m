@@ -342,17 +342,16 @@
 - (void)submitRateScoreToWho:(NSString *)to {
     
     [SVProgressHUD show];
-    
-    NSMutableArray *scoreArray = [NSMutableArray array];
-    for (RateCellDataModel *rateDataModel in self.rateDataModels) {
-        // "time", "describe", "imagery", "harvest", "all"
-        [scoreArray addObject:@(rateDataModel.score)];
-    }
-    
+
     NSMutableDictionary *postDictionary = [NSMutableDictionary dictionary];
     [postDictionary setValue:to forKey:@"to"];
-    [postDictionary setValue:scoreArray forKey:@"skills"];
     
+    NSArray *allKeys = @[@"time", @"describe", @"imagery", @"harvest", @"all"];
+    for (int index = 0; index < self.rateDataModels.count; index ++) {
+        RateCellDataModel *rateDataModel = self.rateDataModels[index];
+        [postDictionary setObject:@(rateDataModel.score) forKey:allKeys[index]];
+    }
+
     [[SyncHelper shareSyncHelper] postScoreWithPostDictionary:postDictionary
                                                    completion:^(NSDictionary *resultDictionary) {
                                                        
