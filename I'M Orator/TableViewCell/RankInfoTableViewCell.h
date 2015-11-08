@@ -8,6 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+static NSString *const RankInfoCellIdentifier = @"RankInfoTableViewCell";
+
 @interface RankInfoTableViewCell : UITableViewCell
+
+@property (weak, nonatomic) IBOutlet UILabel *orderLabel;
+@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
+@property (weak, nonatomic) IBOutlet UILabel *scoreLabel;
+@property (weak, nonatomic) IBOutlet UIView *separatorView;
 
 @end

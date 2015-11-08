@@ -8,6 +8,23 @@
 
 #import <UIKit/UIKit.h>
 
+static NSString *const RateCellIdentifier = @"RateTableViewCell";
+
+@class RateTableViewCell;
+typedef void (^RateButtonClickedBlock)(RateTableViewCell *rateCell, NSInteger score);
+
+@interface RateCellDataModel : NSObject
+
+@property (nonatomic, strong) NSString *titleString;
+
+@property (nonatomic, assign) NSInteger score;
+
+@property (nonatomic, copy) RateButtonClickedBlock rateBlock;
+
+@end
+
 @interface RateTableViewCell : UITableViewCell
+
+- (void)configureWithDataModel:(RateCellDataModel *)dataModel;
 
 @end

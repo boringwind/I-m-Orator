@@ -12,6 +12,4 @@ typedef void(^SPLoginAutoLoginCompletion)(void);
 
 @interface SPLoginController : UIViewController
 
-+ (void)getLastUserID:(NSString **)aUserID lastPassword:(NSString **)aPassword;
-
 @end

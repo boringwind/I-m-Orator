@@ -7,16 +7,10 @@
 //
 
 #import "SPTabBarViewController.h"
-#import "SPKitExample.h"
 
-
-#import "SPContactListController.h"
-#import "SPTribeListViewController.h"
-#import "SPSettingController.h"
-#import "SPUtil.h"
-
-
-#define kTabbarItemCount    4
+#import "CompetitionViewController.h"
+#import "ViewController.h"
+#import "RankViewController.h"
 
 @interface SPTabBarViewController ()
 
@@ -27,15 +21,15 @@
 
 #pragma mark - private
 
-- (UITabBarItem *)_makeItemWithTitle:(NSString *)aTitle normalName:(NSString *)aNormal selectedName:(NSString *)aSelected tag:(NSInteger)aTag
+- (UITabBarItem *)_makeItemWithTitle:(NSString *)aTitle normalName:(NSString *)aNormal tag:(NSInteger)aTag
 {
     UITabBarItem *result = nil;
     
     UIImage *nor = [UIImage imageNamed:aNormal];
-    UIImage *sel = [UIImage imageNamed:aSelected];
+    nor = [nor imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     
     if ([UIDevice currentDevice].systemVersion.floatValue >= 7.f) {
-        result = [[UITabBarItem alloc] initWithTitle:aTitle image:nor selectedImage:sel];
+        result = [[UITabBarItem alloc] initWithTitle:aTitle image:nor selectedImage:nor];
         [result setTag:aTag];
     } else {
         result = [[UITabBarItem alloc] initWithTitle:aTitle image:nor tag:aTag];
@@ -51,107 +45,47 @@
     // Do any additional setup after loading the view.
     
     NSMutableArray *aryControllers = [NSMutableArray array];
-    
-    /// 会话列表页面
+
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    /// 参赛页面
     {
-        __weak typeof(self) weakSelf = self;
-        YWConversationListViewController *conversationListController = [[SPKitExample sharedInstance] exampleMakeConversationListControllerWithSelectItemBlock:^(YWConversation *aConversation) {
-            if ([aConversation isKindOfClass:[YWCustomConversation class]]) {
-                [aConversation markConversationAsRead];
-                
-                YWWebViewController *controller = [YWWebViewController makeControllerWithUrlString:@"http://im.baichuan.taobao.com/"];
-                __weak typeof(controller) weakController = controller;
-                [controller setViewWillAppearBlock:^(BOOL aAnimated) {
-                    [weakController.navigationController setNavigationBarHidden:NO animated:aAnimated];
-                }];
-                [controller setHidesBottomBarWhenPushed:YES];
-                [controller setTitle:@"功能介绍"];
-                [self.navigationController pushViewController:controller animated:YES];
-            } else {
-                [[SPKitExample sharedInstance] exampleOpenConversationViewControllerWithConversation:aConversation fromNavigationController:weakSelf.navigationController];
-            }
-        }];
+        CompetitionViewController *rateController = [storyboard instantiateViewControllerWithIdentifier:@"CompetitionViewController"];
+        UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:rateController];
         
-        // 会话列表空视图
-        if (conversationListController)
-        {
-            CGRect frame = CGRectMake(0, 0, 100, 100);
-            UIView *viewForNoData = [[UIView alloc] initWithFrame:frame];
-            UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"login_logo"]];
-            imageView.center = CGPointMake(viewForNoData.frame.size.width/2, viewForNoData.frame.size.height/2);
-            [imageView setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin];
-            
-            [viewForNoData addSubview:imageView];
-            
-            conversationListController.viewForNoData = viewForNoData;
-        }
-        
-        {
-            // 隐藏会话列表右导航按钮
-//            __weak typeof(conversationListController) weakController = conversationListController;
-//            [conversationListController setViewDidLoadBlock:^{
-//                weakController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addCustomConversation)];
-//            }];
-        }
-
-
-        UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:conversationListController];
-        
-        UITabBarItem *item = [self _makeItemWithTitle:@"消息" normalName:@"news_nor" selectedName:@"news_pre" tag:100];
+        UITabBarItem *item = [self _makeItemWithTitle:@"参 赛" normalName:@"completion_icon" tag:100];
         [naviController setTabBarItem:item];
         
         [aryControllers addObject:naviController];
     }
     
-    // 先隐藏掉
-    /// 联系人列表页面
+    /// 评分页面
     {
-//        SPContactListController *contactListController = [[SPContactListController alloc] initWithNibName:@"SPContactListController" bundle:nil];
-//        
-//        UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:contactListController];
-//        
-//        UITabBarItem *item = [self _makeItemWithTitle:@"联系人" normalName:@"contact_nor" selectedName:@"contact_pre" tag:101];
-//        [naviController setTabBarItem:item];
-//
-//        [aryControllers addObject:naviController];
+        ViewController *rateController = [storyboard instantiateViewControllerWithIdentifier:@"ViewController"];
+        UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:rateController];
+        
+        UITabBarItem *item = [self _makeItemWithTitle:@"打 分" normalName:@"rate_icon" tag:101];
+        [naviController setTabBarItem:item];
+
+        [aryControllers addObject:naviController];
     }
     
-    /// 群页面
+    /// 排名页面
     {
-        SPTribeListViewController *tribeController = [[SPTribeListViewController alloc] init];
-        
+        RankViewController *tribeController = [storyboard instantiateViewControllerWithIdentifier:@"RankViewController"];
         UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:tribeController];
         
-        UITabBarItem *item = [self _makeItemWithTitle:@"群列表" normalName:@"group_nor" selectedName:@"group_pre" tag:102];
-        [naviController setTabBarItem:item];
-
-        [aryControllers addObject:naviController];
-    }
-    
-    /// 设置页面
-    {
-        SPSettingController *settingController = [[SPSettingController alloc] initWithNibName:@"SPSettingController" bundle:nil];
-        
-        UINavigationController *naviController = [[UINavigationController alloc] initWithRootViewController:settingController];
-        
-        UITabBarItem *item = [self _makeItemWithTitle:@"更多" normalName:@"set_nor" selectedName:@"set_pre" tag:103];
+        UITabBarItem *item = [self _makeItemWithTitle:@"排 名" normalName:@"rank_icon" tag:102];
         [naviController setTabBarItem:item];
 
         [aryControllers addObject:naviController];
     }
     
     self.viewControllers = aryControllers;
-    
-    
     if ([self.tabBar respondsToSelector:@selector(setTintColor:)]) {
-        [self.tabBar setTintColor:[UIColor colorWithRed:0 green:1.f*0xb4/0xff blue:1.f alpha:1.f]];
+        [self.tabBar setTintColor:[UIColor colorWithRed:249.f/255.f green:164.f/255.f blue:50.f/255.f alpha:1.f]];
     }
-}
 
-- (void)addCustomConversation
-{
-    // todo
-    [[SPKitExample sharedInstance] exampleAddOrUpdateCustomConversation];
+    [self setSelectedIndex:1];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -165,15 +99,5 @@
     
     [self.navigationController setNavigationBarHidden:YES animated:animated];
 }
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end

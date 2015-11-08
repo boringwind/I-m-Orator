@@ -8,15 +8,96 @@
 
 #import "AppDelegate.h"
 
+#import "SVProgressHUD.h"
+#import "AccountManager.h"
+
+#import "SPLoginController.h"
+#import "SPTabBarViewController.h"
+
+#import "UIImage+ImageEffects.h"
+
 @interface AppDelegate ()
 
 @end
 
 @implementation AppDelegate
 
++ (instancetype)getInstance {
+    return (AppDelegate *)[[UIApplication sharedApplication] delegate];
+}
+
+- (void)lognOut {
+    [AccountManager shareAccountManager].lastUserID = nil;
+//    [AccountManager shareAccountManager].lastPassword = nil;
+    [AccountManager shareAccountManager].token = nil;
+    
+    UIViewController *controller = [[SPLoginController alloc] initWithNibName:@"SPLoginController" bundle:nil];
+    UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:controller];
+    
+    [UIView transitionWithView:[AppDelegate getInstance].window
+                      duration:0.3
+                       options:(UIViewAnimationOptionTransitionCrossDissolve
+                                | UIViewAnimationOptionAllowAnimatedContent)
+                    animations:^{
+                        [AppDelegate getInstance].window.rootViewController = nvc;
+                    }
+                    completion:^(BOOL finished) {
+                    }];
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    // App可以相应摇晃手势
+    application.applicationSupportsShakeToEdit = YES;
+    
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleCustom];
+    [SVProgressHUD setForegroundColor:[UIColor whiteColor]];
+    [SVProgressHUD setBackgroundColor:[UIColor colorWithWhite:0 alpha:0.8]];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+    
+    UIColor *navBarColor = [UIColor colorWithRed:249.f/255.f green:164.f/255.f blue:50.f/255.f alpha:1.f];
+    [[UINavigationBar appearance] setShadowImage:[UIImage imageWithColor:[UIColor clearColor]]];
+    [[UINavigationBar appearance] setBackgroundImage:[UIImage imageWithColor:navBarColor]
+                                       forBarMetrics:UIBarMetricsDefault];
+    [[UINavigationBar appearance] setBarTintColor:navBarColor];
+    
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.lineBreakMode = NSLineBreakByTruncatingTail;
+    paragraphStyle.alignment = NSTextAlignmentCenter;
+    
+    NSShadow *clearShadow = [[NSShadow alloc] init];
+    clearShadow.shadowColor = [UIColor clearColor];
+    clearShadow.shadowOffset = CGSizeMake(0, 0);
+    
+    NSDictionary *textAttributes = @{
+                                     NSParagraphStyleAttributeName : paragraphStyle,
+                                     NSShadowAttributeName : clearShadow,
+                                     NSForegroundColorAttributeName : [UIColor whiteColor],
+                                     NSFontAttributeName : [UIFont systemFontOfSize:18.f]
+                                     };
+    [[UINavigationBar appearance] setTitleTextAttributes:textAttributes];
+    
+    if ([AccountManager shareAccountManager].lastUserID != nil
+//        && [AccountManager shareAccountManager].lastPassword != nil
+        && [AccountManager shareAccountManager].token != nil) {
+        
+        self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        
+        SPTabBarViewController *tabController = [[SPTabBarViewController alloc] init];
+        UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:tabController];
+        self.window.rootViewController = nvc;
+        [self.window makeKeyAndVisible];
+    }
+    else {
+    
+        self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        UIViewController *controller = [[SPLoginController alloc] initWithNibName:@"SPLoginController" bundle:nil];
+        UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:controller];
+        self.window.rootViewController = nvc;
+        [self.window makeKeyAndVisible];
+    }
+    
     return YES;
 }
 

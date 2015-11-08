@@ -10,4 +10,8 @@
 
 @interface RankDataModel : NSObject
 
+@property (nonatomic, strong) NSNumber *order;
+@property (nonatomic, strong) NSString *name;
+@property (nonatomic, strong) NSNumber *score;
+
 @end

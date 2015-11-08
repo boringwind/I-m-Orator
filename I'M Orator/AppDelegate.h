@@ -12,6 +12,9 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
++ (instancetype)getInstance;
+
+- (void)lognOut;
 
 @end
 
