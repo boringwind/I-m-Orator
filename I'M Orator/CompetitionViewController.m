@@ -16,6 +16,7 @@
 @interface CompetitionViewController ()
 
 @property (weak, nonatomic) IBOutlet UIImageView *shakeImageView;
+@property (weak, nonatomic) IBOutlet UILabel *versionLabel;
 
 @property (nonatomic, assign) BOOL requestDoing;
 
@@ -33,6 +34,8 @@
     
     self.title = @"参  赛";
     self.order = @(-1);
+    
+    self.versionLabel.text = @"Version: 1.0.2";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -70,16 +73,18 @@
 - (void)motionBegan:(UIEventSubtype)motion withEvent:(nullable UIEvent *)event {
     if (motion == UIEventSubtypeMotionShake) {
 
-        if (self.requestDoing == YES || [self.order integerValue] != DEFAULT_ORDER) {
-            // 正在从服务器获取自己的Order, 或是已经获取过自己的Order了
-            return;
-        }
-
         [self doShakeImageAnimation];
-        self.requestFinished = NO;
+
         self.shakeFinished = NO;
         self.tabBarController.tabBar.userInteractionEnabled = NO;
         
+        if (self.requestDoing == YES || [self.order integerValue] != DEFAULT_ORDER) {
+            // 正在从服务器获取自己的Order, 或是已经获取过自己的Order了
+            [self endShakeOrRequest];
+            return;
+        }
+
+        self.requestFinished = NO;
         // 调用网络请求
         [[SyncHelper shareSyncHelper] getOrderCompletion:^(NSDictionary *resultDictionary) {
             self.requestFinished = YES;
@@ -102,7 +107,7 @@
     if (motion == UIEventSubtypeMotionShake) {
         self.shakeFinished = YES;
         [self resignFirstResponder];
-        [self endShakeOrRequest];
+        [self performSelector:@selector(endShakeOrRequest) withObject:nil afterDelay:2.f];
     }
 }
 
@@ -110,7 +115,7 @@
     if (motion == UIEventSubtypeMotionShake) {
         self.shakeFinished = YES;
         [self resignFirstResponder];
-        [self endShakeOrRequest];
+        [self performSelector:@selector(endShakeOrRequest) withObject:nil afterDelay:2.f];
     }
 }
 
@@ -129,7 +134,7 @@
      
         UIAlertView *alertView =
             [[UIAlertView alloc] initWithTitle:nil
-                                       message:[NSString stringWithFormat:@"你的参赛编号是：%ld", [self.order integerValue]]
+                                       message:[NSString stringWithFormat:@"你的参赛编号是：%ld", (long)[self.order integerValue]]
                                       delegate:nil
                              cancelButtonTitle:@"我记下了"
                              otherButtonTitles:nil];

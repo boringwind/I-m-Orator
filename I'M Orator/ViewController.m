@@ -95,6 +95,10 @@
     [[AppDelegate getInstance].window addSubview:self.maskImageView];
     self.maskImageView.hidden = YES;
     
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(dismissMask:)];
+    [self.maskImageView addGestureRecognizer:tapGesture];
+    
     self.contestantTableView = [[UITableView alloc] init];
     self.contestantTableView.delegate = self;
     self.contestantTableView.dataSource = self;
@@ -118,6 +122,10 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self pullAllContestant:nil];
+}
+
+- (void)dismissMask:(UITapGestureRecognizer *)tapGesture {
+    [self dismissContestant:nil];
 }
 
 #pragma mark - UITableViewDataSource
@@ -182,30 +190,59 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    if (tableView == self.tableView && self.rateDataModels.count == indexPath.section) {
-        // 点击了提交按钮
-        for (RateCellDataModel *rateDataModel in self.rateDataModels) {
-            if (rateDataModel.score == 0) {
-                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil
-                                                                    message:@"🙏🏻你真的要给他打0分吗？🙏🏻"
-                                                                   delegate:self
-                                                          cancelButtonTitle:@"重新打分"
-                                                          otherButtonTitles:@"继续提交", nil];
-                [alertView show];
-                return;
+    if (tableView == self.tableView) {
+            if (self.rateDataModels.count == indexPath.section) {
+            // 点击了提交按钮
+            for (RateCellDataModel *rateDataModel in self.rateDataModels) {
+                if (rateDataModel.score == 0) {
+                    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil
+                                                                        message:@"🙏🏻你真的要给他打0分吗？🙏🏻"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"重新打分"
+                                                              otherButtonTitles:@"继续提交", nil];
+                    [alertView show];
+                    return;
+                }
             }
-        }
-        
-        if (self.contestantDataModels.count == 0) {
-            [SVProgressHUD show];
-            [self pullAllContestant:^{
+            
+            if (self.contestantDataModels.count == 0) {
+                [SVProgressHUD show];
+                [self pullAllContestant:^{
+                    [self.contestantTableView reloadData];
+                    [self showAllContestantAndChoose];
+                }];
+            }
+            else {
                 [self.contestantTableView reloadData];
                 [self showAllContestantAndChoose];
-            }];
+            }
         }
         else {
-            [self.contestantTableView reloadData];
-            [self showAllContestantAndChoose];
+            NSString *alertTitle = nil;
+            switch (indexPath.section) {
+                case 0:
+                    alertTitle = @"1. 对演讲时间的把控，是否有在比赛规定时间内表达出想要表达的主题；";
+                    break;
+                case 1:
+                    alertTitle = @"2. 演讲内容的饱满度，是靠嗯、额等词拖完了整个演讲，还是整个演讲条理清晰、思路连贯，甚至是妙语频出、语惊四座；";
+                    break;
+                case 2:
+                    alertTitle = @"3. 形象分，包括：着装是否得体（对得起自己作为一个比赛者的着装）、演讲过程中声音是否宏亮（至少保证每一个听众能听见）、口齿语气语速是否合适（简单说就是能否听清）...";
+                    break;
+                case 3:
+                    alertTitle = @"4. 听完演讲后的个人收获，可以从获取的知识量、顿悟警醒的程度等角度来考量；";
+                    break;
+                default:
+                    alertTitle = @"5. 对整次演讲的评分。";
+                    break;
+            }
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"🔍评分规则详解🔍"
+                                                                message:alertTitle
+                                                               delegate:nil
+                                                      cancelButtonTitle:@"秒懂"
+                                                      otherButtonTitles:nil];
+            [alertView show];
+            return;
         }
     }
     else {
