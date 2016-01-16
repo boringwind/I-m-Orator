@@ -35,7 +35,7 @@
     self.title = @"参  赛";
     self.order = @(-1);
     
-    self.versionLabel.text = @"Version: 1.0.2";
+    self.versionLabel.text = @"Version: 1.0.3";
 }
 
 - (void)viewWillAppear:(BOOL)animated {

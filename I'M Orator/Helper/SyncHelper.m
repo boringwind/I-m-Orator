@@ -37,8 +37,8 @@ static SyncHelper *shareSyncHelper = nil;
 #pragma mark - Accessor Methods
 
 - (NSString *)prefixSiteDomainToURLString:(NSString *)urlString {
-    return [@"http://letshareba.com:8082" stringByAppendingString:urlString];
-//    return [@"http://192.168.0.113:8082" stringByAppendingString:urlString];
+//    return [@"http://letshareba.com:8082" stringByAppendingString:urlString];
+    return [@"http://45.78.3.131:8082" stringByAppendingString:urlString];
 }
 
 - (NSDictionary *)customHttpHeader:(BOOL)withToken {
